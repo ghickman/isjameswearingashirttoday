@@ -1,4 +1,7 @@
+from datetime import datetime
+from email.utils import parsedate
 from os.path import abspath, dirname, join
+from time import mktime
 
 from twitter import Api
 
@@ -7,17 +10,27 @@ DIRNAME = abspath(dirname(__file__))
 TAGLINE = '\n        <p>Why not ask him about it?</p>'
 
 twitter = Api(
-    consumer_key='y2UGsVoswbDXurxYZIS7mg',
-    consumer_secret='SVNdTZSBnxZSgJcjrlRHfCsTX2H4OhgP1sxIcNtM',
-    access_token_key='14306567-XP53DhZMp4WOHLauRrAAgmr8ispHAp8hGu2qoSkp9',
-    access_token_secret='Quu3A9aTNwK1OYL2gw7Iz8IDWBqqgQbxIbgmj6yKbY'
+    consumer_key='Wz5EWnKIG4c8Q2Eq3vc8Q',
+    consumer_secret='eY8VPjH0IrVFN9QY3gJex0jKUxBv4cCY7Jzgpe7g',
+    access_token_key='379060931-sGwVkbF3nrEGt7qCHJcKYmM9Py7qxYFJHz3i16zQ',
+    access_token_secret='cD21OBNRFfo8DnXkDquAFDoBYnP7oKgI72Am13kEKQ4'
 )
 
 def replace_text(html, cur_status, new_status, cur_tagline, new_tagline):
     with open(join(DIRNAME, 'index.html'), 'w') as f:
         f.write(html.replace(cur_status, new_status).replace(cur_tagline, new_tagline))
 
-text = twitter.GetUserTimeline('379060931')[0].text.lower()
+def tweet_date(date):
+    return datetime.fromtimestamp(mktime(parsedate(date)))
+
+def tweet_text():
+    reply = twitter.GetReplies()[0]
+    tweet = twitter.GetUserTimeline()[0]
+    if tweet_date(reply.created_at) > tweet_date(tweet.created_at):
+        return reply.text
+    return tweet.text
+
+text = tweet_text()
 with open(join(DIRNAME, 'index.html')) as f:
     html = f.read()
 
